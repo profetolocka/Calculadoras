@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Sección de Cables</title>
+    <style>
+        /* Estilos CSS */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 20px;
+        }
+
+        .calculo-corriente-container {
+            max-width: 400px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculo-corriente-title {
+            color: #333;
+        }
+
+        .calculo-corriente-text {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .calculo-corriente-label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .calculo-corriente-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .calculo-corriente-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .calculo-corriente-button {
+            background-color: #0453F1;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 48%;
+            box-sizing: border-box;
+        }
+
+        .calculo-corriente-button:hover {
+            background-color: #023eab;
+        }
+
+        .calculo-corriente-result {
+            margin-top: 10px;
+        }
+
+        .calculo-corriente-error {
+            color: #ff0000;
+            margin-top: 5px;
+        }
+
+        .negrita {
+            font-weight: bold;
+        }
+
+        .superindice {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        .reiniciar-button {
+            background-color: #0453F1;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 48%;
+            box-sizing: border-box;
+        }
+
+        .reiniciar-button:hover {
+            background-color: #023eab;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculo-corriente-container">
+        <!-- Contenido HTML -->
+        <h2 class="calculo-corriente-title">Calculadora de Sección de Cables</h2>
+
+        <p class="calculo-corriente-text">Ingrese la corriente de proyecto y seleccione el tipo de circuito, la instalación y la cantidad de circuitos en la misma canalización:</p>
+
+        <label for="corrienteProyecto" class="calculo-corriente-label">Corriente de Proyecto (Ib):</label>
+        <input type="number" id="corrienteProyecto" class="calculo-corriente-input" placeholder="Ingrese la corriente en Amperios">
+
+        <label for="tipoCircuito" class="calculo-corriente-label">Tipo de Circuito:</label>
+        <select id="tipoCircuito" class="calculo-corriente-input">
+            <option value="Iluminacion">Iluminación</option>
+            <option value="Tomacorrientes">Tomacorrientes</option>
+            <option value="IluminacionConTomaDerivado">Iluminación con toma derivado</option>
+            <option value="UsoEspecial">Uso especial</option>
+            <option value="UsoEspecifico">Uso específico</option>
+        </select>
+
+        <label for="tipoInstalacion" class="calculo-corriente-label">Tipo de Instalación:</label>
+        <select id="tipoInstalacion" class="calculo-corriente-input">
+            <option value="Monofasica">Monofásica</option>
+            <option value="Trifasica">Trifásica</option>
+        </select>
+
+        <label for="circuitosCanalizacion" class="calculo-corriente-label">Circuitos en la misma canalización:</label>
+        <select id="circuitosCanalizacion" class="calculo-corriente-input">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+
+        <div class="calculo-corriente-buttons">
+            <button onclick="calcularSeccion()" class="calculo-corriente-button">CALCULAR</button>
+            <button onclick="reiniciarFormulario()" class="reiniciar-button">REINICIAR</button>
+        </div>
+
+        <div id="resultado" class="calculo-corriente-result"></div>
+    </div>
+
+    <script>
+        // Funciones JavaScript
+        var seccionesTabla;  // Declarar fuera de la función para que sea accesible por otras funciones
+        var corrientesTabla;  // Declarar fuera de la función para que sea accesible por otras funciones
+
+        function calcularSeccion() {
+            // Obtener el valor de la corriente de proyecto, el tipo de circuito, el tipo de instalación y la cantidad de circuitos en la misma canalización
+            var corrienteProyecto = parseFloat(document.getElementById('corrienteProyecto').value);
+            var tipoCircuito = document.getElementById('tipoCircuito').value;
+            var tipoInstalacion = document.getElementById('tipoInstalacion').value;
+            var circuitosCanalizacion = parseInt(document.getElementById('circuitosCanalizacion').value);
+
+            // Verificar si se ha ingresado un valor válido en el campo Corriente de Proyecto
+            if (isNaN(corrienteProyecto) || corrienteProyecto <= 0) {
+                document.getElementById('resultado').innerHTML = "<p class='calculo-corriente-error'>Error, ingrese una corriente de proyecto válida mayor a cero.</p>";
+                return;
+            }
+
+            // Consultar la tabla y calcular la sección del cable
+            var seccionesTablaMonofasica = [1, 1.5, 2.5, 4, 6, 10];
+            var corrientesTablaMonofasica = [11, 15, 21, 28, 36, 50];
+
+            var seccionesTablaTrifasica = [1, 1.5, 2.5, 4, 6, 10];
+            var corrientesTablaTrifasica = [10, 15, 18, 25, 32, 44];
+
+            if (tipoInstalacion === 'Monofasica') {
+                seccionesTabla = seccionesTablaMonofasica;
+                corrientesTabla = corrientesTablaMonofasica;
+            } else {
+                seccionesTabla = seccionesTablaTrifasica;
+                corrientesTabla = corrientesTablaTrifasica;
+            }
+
+            var resultado = "";
+
+            // Verificar si la corriente de proyecto es demasiado elevada
+            if ((tipoInstalacion === 'Monofasica' && corrienteProyecto > 50) || 
+                (tipoInstalacion === 'Trifasica' && corrienteProyecto > 44)) {
+                resultado = "<p class='calculo-corriente-error'>Error, corriente demasiado elevada</p>";
+            } else {
+                resultado += "Sección de Cables (Fase y Neutro): ";
+
+                for (var i = 0; i < seccionesTabla.length; i++) {
+                    if (corrienteProyecto <= corrientesTabla[i]) {
+                        var seccionFaseNeutro = ajustarSeccionMinima(seccionesTabla[i], tipoCircuito);
+                        resultado += "<span class='negrita'>" + seccionFaseNeutro + " mm<sup><span class='superindice'>2</span></sup></span>";
+
+                        // Almacenar la corriente máxima sin ajustar
+                        var corrienteMaxima = calcularCorrienteMaxima(seccionFaseNeutro, tipoInstalacion);
+
+                        // Mostrar la corriente máxima sin ajustar
+                        resultado += "<br>Corriente Máxima de la Sección Elegida: <span class='negrita'>" + corrienteMaxima.toFixed(1) + " A</span>";
+
+                        // Calcular la sección del conductor de protección (PE)
+                        var seccionPE = Math.max(seccionFaseNeutro, 2.5);
+                        resultado += "<br>Sección del conductor de protección (PE): <span class='negrita'>" + seccionPE + " mm<sup><span class='superindice'>2</span></sup></span>";
+
+                        // Ajustar la corriente máxima según la cantidad de circuitos en la misma canalización
+                        var corrienteMaximaAjustada = ajustarCorrienteMaxima(corrienteMaxima, circuitosCanalizacion);
+                        resultado += "<br>Corriente Máxima Ajustada: <span class='negrita'>" + corrienteMaximaAjustada.toFixed(1) + " A</span>";
+
+                        break;
+                    }
+                }
+            }
+
+            // Mostrar el resultado
+            document.getElementById('resultado').innerHTML = resultado;
+        }
+
+        function ajustarSeccionMinima(seccionCalculada, tipoCircuito) {
+            // Verificar la sección mínima
+            var seccionMinima = obtenerSeccionMinima(tipoCircuito);
+
+            // Ajustar la sección según el valor mínimo
+            return Math.max(seccionCalculada, seccionMinima);
+        }
+
+        function obtenerSeccionMinima(tipoCircuito) {
+            var seccionMinima;
+
+            switch (tipoCircuito) {
+                case 'Iluminacion':
+                    seccionMinima = 1.5;
+                    break;
+                case 'Tomacorrientes':
+                case 'IluminacionConTomaDerivado':
+                case 'UsoEspecial':
+                case 'UsoEspecifico':
+                    seccionMinima = 2.5;
+                    break;
+                default:
+                    seccionMinima = 1; // Valor predeterminado en caso de tipo no reconocido
+                    break;
+            }
+
+            return seccionMinima;
+        }
+
+        function calcularCorrienteMaxima(seccion, tipoInstalacion) {
+            // Consultar la tabla y obtener la corriente máxima para la sección y tipo de instalación
+            var tablaCorrientesMaximas;
+
+            if (tipoInstalacion === 'Monofasica') {
+                tablaCorrientesMaximas = [11, 15, 21, 28, 36, 50];
+            } else {
+                tablaCorrientesMaximas = [10, 15, 18, 25, 32, 44];
+            }
+
+            for (var i = 0; i < seccionesTabla.length; i++) {
+                if (seccion === seccionesTabla[i]) {
+                    return tablaCorrientesMaximas[i];
+                }
+            }
+
+            // Si no se encuentra la sección en la tabla, devolver un valor predeterminado
+            return 0;
+        }
+
+        function reiniciarFormulario() {
+            // Limpiar los campos del formulario
+            document.getElementById('corrienteProyecto').value = '';
+            document.getElementById('tipoCircuito').selectedIndex = 0;
+            document.getElementById('tipoInstalacion').selectedIndex = 0;
+            document.getElementById('circuitosCanalizacion').selectedIndex = 0;
+
+            // Limpiar el resultado
+            document.getElementById('resultado').innerHTML = '';
+        }
+
+        function ajustarCorrienteMaxima(corrienteMaxima, circuitosCanalizacion) {
+            // Ajustar la corriente máxima según la cantidad de circuitos en la misma canalización
+            if (circuitosCanalizacion === 2) {
+                return corrienteMaxima * 0.8;
+            } else if (circuitosCanalizacion === 3) {
+                return corrienteMaxima * 0.7;
+            }
+
+            // Si no se cumple ninguna condición, devolver la corriente máxima sin ajustar
+            return corrienteMaxima;
+        }
+    </script>
+</body>
+</html>
