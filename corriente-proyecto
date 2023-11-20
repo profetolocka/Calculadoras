@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 20px;
+        }
+
+        .calculo-corriente-container {
+            max-width: 400px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculo-corriente-title {
+            color: #333;
+        }
+
+        .calculo-corriente-text {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .calculo-corriente-label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .calculo-corriente-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .calculo-corriente-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calculo-corriente-button {
+            background-color: #0453F1;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 48%;
+        }
+
+        .calculo-corriente-button:hover {
+            background-color: #023eab;
+        }
+
+        .calculo-corriente-result {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .calculo-corriente-error {
+            color: #ff0000;
+            margin-top: 5px;
+        }
+    </style>
+    <title>Calculadora de Corriente de Proyecto</title>
+</head>
+<body>
+    <div class="calculo-corriente-container">
+        <h2 class="calculo-corriente-title">Calculadora de Corriente de Proyecto</h2>
+        <p class="calculo-corriente-text">Ingrese los valores requeridos:</p>
+
+        <label for="tipoCircuito" class="calculo-corriente-label">Tipo de circuito:</label>
+        <select id="tipoCircuito" class="calculo-corriente-input">
+            <option value="IUG">IUG</option>
+            <option value="IUGDerivado">IUG mas toma derivado</option>
+            <option value="TUG">TUG</option>
+            <option value="TUE">TUE</option>
+            <option value="Otro">Otro</option>
+        </select>
+
+        <label for="cantidadBocas" class="calculo-corriente-label">Cantidad de bocas:</label>
+        <input type="number" id="cantidadBocas" min="1" max="15" required class="calculo-corriente-input">
+        <div id="error" class="calculo-corriente-error"></div>
+
+        <label for="tension" class="calculo-corriente-label">Tensión (Voltios):</label>
+        <input type="number" id="tension" value="220" min="1" required class="calculo-corriente-input">
+
+        <label for="dpms" class="calculo-corriente-label">DPMS (VA):</label>
+        <input type="number" id="dpms" min="0" required class="calculo-corriente-input">
+
+        <div class="calculo-corriente-buttons">
+            <button id="calcular" class="calculo-corriente-button">CALCULAR</button>
+            <button id="reiniciar" class="calculo-corriente-button">REINICIAR</button>
+        </div>
+
+        <div id="result" class="calculo-corriente-result"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tipoCircuito = document.getElementById('tipoCircuito');
+            var cantidadBocasField = document.getElementById('cantidadBocas');
+            var tensionField = document.getElementById('tension');
+            var dpmsField = document.getElementById('dpms');
+            var resultElement = document.getElementById('result');
+            var errorElement = document.getElementById('error');
+            var calcularButton = document.getElementById('calcular');
+            var reiniciarButton = document.getElementById('reiniciar');
+
+            tipoCircuito.addEventListener('change', function () {
+                // Limpiar campos si se selecciona "Otro" o "IUG mas toma derivado"
+                if (tipoCircuito.value === 'Otro' || tipoCircuito.value === 'IUGDerivado') {
+                    cantidadBocasField.value = '';
+                    dpmsField.value = '';
+                } else {
+                    // Actualizar el campo "DPMS" al cambiar el tipo de circuito
+                    switch (tipoCircuito.value) {
+                        case 'IUG':
+                            dpmsField.value = cantidadBocasField.value * 40;
+                            break;
+                        case 'IUGDerivado':
+                            dpmsField.value = 2200; // Valor fijo para "IUG mas toma derivado"
+                            break;
+                        case 'TUG':
+                            dpmsField.value = 2200;
+                            break;
+                        case 'TUE':
+                            dpmsField.value = 3300;
+                            break;
+                        default:
+                            dpmsField.value = ''; // Dejar en blanco si no es IUG, IUGDerivado, TUG o TUE
+                            break;
+                    }
+                }
+            });
+
+            cantidadBocasField.addEventListener('input', function () {
+                // Validar que la cantidad de bocas esté entre 1 y 15
+                var cantidadBocasValue = parseInt(cantidadBocasField.value);
+                if (cantidadBocasValue < 1 || cantidadBocasValue > 15) {
+                    errorElement.innerText = 'Ingrese un valor entre 1 y 15.';
+                } else {
+                    errorElement.innerText = '';
+                    // Actualizar el campo "DPMS" al modificar la cantidad de bocas
+                    if (tipoCircuito.value === 'IUG') {
+                        dpmsField.value = cantidadBocasValue * 40;
+                    }
+                }
+            });
+
+            tipoCircuito.addEventListener('change', function () {
+                // Actualizar el campo "DPMS" al cambiar el tipo de circuito
+                switch (tipoCircuito.value) {
+                    case 'IUG':
+                        dpmsField.value = cantidadBocasField.value * 40;
+                        break;
+                    case 'IUGDerivado':
+                        dpmsField.value = 2200; // Valor fijo para "IUG mas toma derivado"
+                        break;
+                    case 'TUG':
+                        dpmsField.value = 2200;
+                        break;
+                    case 'TUE':
+                        dpmsField.value = 3300;
+                        break;
+                    default:
+                        dpmsField.value = ''; // Dejar en blanco si no es IUG, IUGDerivado, TUG o TUE
+                        break;
+                }
+            });
+
+            calcularButton.addEventListener('click', function () {
+                var cantidadBocasValue = parseFloat(cantidadBocasField.value);
+                var tensionValue = parseFloat(tensionField.value);
+                var dpmsValue = parseFloat(dpmsField.value);
+
+                var ib = dpmsValue / tensionValue;
+                resultElement.innerText = 'Corriente de Proyecto (Ib): ' + ib.toFixed(2) + ' Amperes';
+            });
+
+            reiniciarButton.addEventListener('click', function () {
+                // Reiniciar todos los campos y resultados
+                tipoCircuito.value = 'IUG';
+                cantidadBocasField.value = '';
+                tensionField.value = '220';
+                dpmsField.value = '';
+                resultElement.innerText = '';
+                errorElement.innerText = '';
+            });
+        });
+    </script>
+</body>
+</html>
