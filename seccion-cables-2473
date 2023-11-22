@@ -155,11 +155,11 @@
             }
 
             // Consultar la tabla y calcular la sección del cable
-            var seccionesTablaMonofasica = [1, 1.5, 2.5, 4, 6, 10];
-            var corrientesTablaMonofasica = [11, 15, 21, 28, 36, 50];
+            var seccionesTablaMonofasica = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
+            var corrientesTablaMonofasica = [11, 15, 21, 28, 36, 50, 66, 88, 109, 131, 167, 202, 234, 261, 297, 348, 398];
 
-            var seccionesTablaTrifasica = [1, 1.5, 2.5, 4, 6, 10];
-            var corrientesTablaTrifasica = [10, 15, 18, 25, 32, 44];
+            var seccionesTablaTrifasica = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
+            var corrientesTablaTrifasica = [10, 14, 18, 25, 32, 44, 59, 77, 96, 117, 149, 180, 208, 228, 258, 301, 343];
 
             if (tipoInstalacion === 'Monofasica') {
                 seccionesTabla = seccionesTablaMonofasica;
@@ -172,8 +172,8 @@
             var resultado = "";
 
             // Verificar si la corriente de proyecto es demasiado elevada
-            if ((tipoInstalacion === 'Monofasica' && corrienteProyecto > 50) || 
-                (tipoInstalacion === 'Trifasica' && corrienteProyecto > 44)) {
+            if ((tipoInstalacion === 'Monofasica' && corrienteProyecto > 398) || 
+                (tipoInstalacion === 'Trifasica' && corrienteProyecto > 343)) {
                 resultado = "<p class='calculo-corriente-error'>Error, corriente demasiado elevada</p>";
             } else {
                 resultado += "Sección de Cables (Fase y Neutro): ";
@@ -189,9 +189,19 @@
                         // Mostrar la corriente máxima sin ajustar
                         resultado += "<br>Corriente Máxima de la Sección Elegida: <span class='negrita'>" + corrienteMaxima.toFixed(1) + " A</span>";
 
-                        // Calcular la sección del conductor de protección (PE)
-                        var seccionPE = Math.max(seccionFaseNeutro, 2.5);
-                        resultado += "<br>Sección del conductor de protección (PE): <span class='negrita'>" + seccionPE + " mm<sup><span class='superindice'>2</span></sup></span>";
+                        // Modificación para la sección del conductor de protección (PE)
+    					var seccionPE;
+   						if (seccionFaseNeutro <= 16) {
+        					seccionPE = seccionFaseNeutro;
+    					} else if (seccionFaseNeutro > 16 && seccionFaseNeutro <= 35) {
+        					seccionPE = 16;
+    					} else {
+        					seccionPE = seccionFaseNeutro / 2;
+    					}
+                      
+                        // Mostrar la sección del conductor de protección (PE)
+    					resultado += "<br>Sección del conductor de protección (PE): <span class='negrita'>" + Math.max(seccionPE, 2.5) + " mm<sup><span class='superindice'>2</span></sup></span>";
+                      
 
                         // Ajustar la corriente máxima según la cantidad de circuitos en la misma canalización
                         var corrienteMaximaAjustada = ajustarCorrienteMaxima(corrienteMaxima, circuitosCanalizacion);
@@ -240,9 +250,9 @@
             var tablaCorrientesMaximas;
 
             if (tipoInstalacion === 'Monofasica') {
-                tablaCorrientesMaximas = [11, 15, 21, 28, 36, 50];
+                tablaCorrientesMaximas = [11, 15, 21, 28, 36, 50, 66, 88, 109, 131, 167, 202, 234, 261, 297, 348, 398];
             } else {
-                tablaCorrientesMaximas = [10, 15, 18, 25, 32, 44];
+                tablaCorrientesMaximas = [10, 14, 18, 25, 32, 44, 59, 77, 96, 117, 149, 180, 208, 228, 258, 301, 343];
             }
 
             for (var i = 0; i < seccionesTabla.length; i++) {
