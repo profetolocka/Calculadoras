@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="description" content="[add your bin description]" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Caída de Tensión</title>
@@ -23,11 +22,6 @@
 
         .calculo-caida771-title {
             color: #333;
-        }
-
-        .calculo-caida771-text {
-            color: #555;
-            margin-bottom: 20px;
         }
 
         .calculo-caida771-label {
@@ -61,6 +55,7 @@
             border: none;
             cursor: pointer;
             width: 48%;
+            text-transform: uppercase;
         }
 
         .calculo-caida771-button:hover {
@@ -70,12 +65,7 @@
         .calculo-caida771-result {
             font-weight: bold;
             margin-top: 10px;
-            color: #333;  /* Agregado para mejorar la visibilidad */
-        }
-
-        .calculo-caida771-error {
-            color: #ff0000;
-            margin-top: 5px;
+            color: #333;
         }
     </style>
 </head>
@@ -103,7 +93,7 @@
         </select>
 
         <label for="instalacion" class="calculo-caida771-label">Tipo de Instalación: </label>
-        <select id="instalacion" class="calculo-caida771-input">
+        <select id="instalacion" class="calculo-caida771-input" onchange="cargarTension()">
             <option value="monofasica" selected>Monofásica</option>
             <option value="trifasica">Trifásica</option>
         </select>
@@ -113,6 +103,7 @@
 
         <div class="calculo-caida771-buttons">
             <button onclick="calcularCaidaTension()" class="calculo-caida771-button">Calcular</button>
+            <button onclick="reiniciarCalculo()" class="calculo-caida771-button">Reiniciar</button>
         </div>
 
         <h3 class="calculo-caida771-result">Resultado:</h3>
@@ -121,18 +112,32 @@
     </div>
 
     <script>
+        function cargarTension() {
+            var tipoInstalacion = document.getElementById('instalacion').value;
+            var tensionInput = document.getElementById('tension');
+
+            // Establecer el valor predeterminado de la tensión según el tipo de instalación
+            if (tipoInstalacion === 'monofasica') {
+                tensionInput.value = '220';
+            } else if (tipoInstalacion === 'trifasica') {
+                tensionInput.value = '380';
+            }
+        }
+
         function calcularCaidaTension() {
             // Obtener valores de los campos
             var corriente = document.getElementById('corriente').value;
             var longitud = document.getElementById('longitud').value;
-            var unidadLongitud = document.getElementById('unidadLongitud').value;
             var seccion = document.getElementById('seccion').value;
-            var tension = document.getElementById('tension').value;
             var material = document.getElementById('material').value;
             var instalacion = document.getElementById('instalacion').value;
+            var tension = document.getElementById('tension').value;
 
-            // Convertir la longitud a metros si se ingresó en kilómetros
-            var longitudEnMetros = (unidadLongitud === 'kilometros') ? longitud * 1000 : parseFloat(longitud);
+            // Convertir la longitud a kilómetros si es necesario
+            var longitudEnMetros = longitud;
+            if (document.getElementById('unidadLongitud').value === 'kilometros') {
+                longitudEnMetros *= 1000;
+            }
 
             // Calcular el Gradiente de Caída (GDC) según las condiciones dadas
             var gdc;
@@ -156,5 +161,21 @@
             document.getElementById('resultado').innerText = 'Caída de Tensión: ' + caidaTension.toFixed(2) + ' Voltios';
             document.getElementById('resultadoPorcentual').innerText = 'Caída de Tensión Porcentual: ' + caidaTensionPorcentual.toFixed(2) + '%';
         }
+
+        function reiniciarCalculo() {
+            // Limpiar los resultados y los campos de entrada
+            document.getElementById('resultado').innerText = "";
+            document.getElementById('resultadoPorcentual').innerText = "";
+
+            // Restablecer los valores predeterminados
+            document.getElementById('corriente').value = "";
+            document.getElementById('longitud').value = "";
+            document.getElementById('unidadLongitud').value = "metros";
+            document.getElementById('seccion').value = "";
+            document.getElementById('material').value = "cobre";
+            document.getElementById('instalacion').value = "monofasica";
+            document.getElementById('tension').value = "220";
+        }
     </script>
 </body>
+</html>
