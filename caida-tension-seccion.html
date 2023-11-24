@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Sección de Cable</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 20px;
+        }
+
+        .calculo-caida771-container {
+            max-width: 400px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculo-caida771-title {
+            color: #333;
+        }
+
+        .calculo-caida771-label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .calculo-caida771-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .unidad-selector {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .calculo-caida771-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calculo-caida771-button {
+            background-color: #0453F1;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 48%;
+            text-transform: uppercase;
+        }
+
+        .calculo-caida771-button:hover {
+            background-color: #023eab;
+        }
+
+        .calculo-caida771-result {
+            font-weight: bold;
+            margin-top: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculo-caida771-container">
+        <h2 class="calculo-caida771-title">Calculadora de Sección de Cable</h2>
+
+        <label for="corriente" class="calculo-caida771-label">Corriente (amperes): </label>
+        <input type="number" id="corriente" class="calculo-caida771-input" required>
+
+        <label for="longitud" class="calculo-caida771-label">Longitud: </label>
+        <input type="number" id="longitud" class="calculo-caida771-input" required>
+        <select id="unidadLongitud" class="unidad-selector">
+            <option value="metros" selected>m</option>
+            <option value="kilometros">km</option>
+        </select>
+
+        <label for="material" class="calculo-caida771-label">Material del Cable: </label>
+        <select id="material" class="calculo-caida771-input">
+            <option value="cobre" selected>Cobre</option>
+            <option value="aluminio">Aluminio</option>
+        </select>
+
+        <label for="instalacion" class="calculo-caida771-label">Tipo de Instalación: </label>
+        <select id="instalacion" class="calculo-caida771-input" onchange="cargarTension()">
+            <option value="monofasica" selected>Monofásica</option>
+            <option value="trifasica">Trifásica</option>
+        </select>
+
+        <label for="tension" class="calculo-caida771-label">Tensión (voltios): </label>
+        <input type="number" id="tension" class="calculo-caida771-input" required>
+
+        <label for="maxCaidaTension" class="calculo-caida771-label">Máxima Caída de Tensión (%): </label>
+        <input type="number" id="maxCaidaTension" class="calculo-caida771-input" required>
+
+        <div class="calculo-caida771-buttons">
+            <button onclick="calcularSeccionCable()" class="calculo-caida771-button">Calcular Sección</button>
+            <button onclick="reiniciarCalculo()" class="calculo-caida771-button">Reiniciar</button>
+        </div>
+
+        <h3 class="calculo-caida771-result">Resultado:</h3>
+        <p id="seccionResultado" class="calculo-caida771-result"></p>
+        <p id="caidaTensionResultado" class="calculo-caida771-result"></p>
+    </div>
+
+    <script>
+        function cargarTension() {
+            var tipoInstalacion = document.getElementById('instalacion').value;
+            var tensionInput = document.getElementById('tension');
+
+            // Establecer el valor predeterminado de la tensión según el tipo de instalación
+            if (tipoInstalacion === 'monofasica') {
+                tensionInput.value = '220';
+            } else if (tipoInstalacion === 'trifasica') {
+                tensionInput.value = '380';
+            }
+        }
+
+        function calcularSeccionCable() {
+            // Obtener valores de los campos
+            var corriente = parseFloat(document.getElementById('corriente').value);
+            var longitud = parseFloat(document.getElementById('longitud').value);
+            var material = document.getElementById('material').value;
+            var instalacion = document.getElementById('instalacion').value;
+            var tension = parseFloat(document.getElementById('tension').value);
+            var maxCaidaTension = parseFloat(document.getElementById('maxCaidaTension').value);
+
+            // Convertir la longitud a kilómetros si es necesario
+            var longitudEnMetros = longitud;
+            if (document.getElementById('unidadLongitud').value === 'kilometros') {
+                longitudEnMetros *= 1000;
+            }
+
+            // Calcular el Gradiente de Caída (GDC) según las condiciones dadas
+            var gdc;
+            if (material === 'cobre' && instalacion === 'monofasica') {
+                gdc = 0.04;
+            } else if (material === 'aluminio' && instalacion === 'monofasica') {
+                gdc = 0.063;
+            } else if (material === 'cobre' && instalacion === 'trifasica') {
+                gdc = 0.035;
+            } else if (material === 'aluminio' && instalacion === 'trifasica') {
+                gdc = 0.055;
+            }
+
+            // Calcular la sección del cable para cumplir con la máxima caída de tensión
+            var seccionCalculada = (gdc * corriente * longitudEnMetros) / (maxCaidaTension / 100 * tension);
+
+            // Seleccionar la sección más cercana y mayor del conjunto proporcionado
+            var seccionesDisponibles = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
+            var seccion = seccionesDisponibles.reduce(function (prev, curr) {
+                return (Math.abs(curr - seccionCalculada) < Math.abs(prev - seccionCalculada) ? curr : prev);
+            });
+
+            // Mostrar el resultado con el superíndice "2"
+            document.getElementById('seccionResultado').innerText = 'Sección del Cable Necesaria: ' + seccion + ' mm²';
+
+            // Calcular la caída de tensión porcentual con la sección calculada
+            var caidaTensionCalculada = gdc * corriente * longitudEnMetros / seccion;
+            var caidaTensionPorcentualCalculada = (caidaTensionCalculada * 100) / tension;
+
+            // Mostrar la caída de tensión porcentual con la sección calculada
+            document.getElementById('caidaTensionResultado').innerText = 'Caída de Tensión con ' + seccion + ' mm²: ' + caidaTensionPorcentualCalculada.toFixed(2) + '%';
+        }
+
+        function reiniciarCalculo() {
+            // Limpiar los resultados y los campos de entrada
+            document.getElementById('seccionResultado').innerText = "";
+            document.getElementById('caidaTensionResultado').innerText = "";
+
+            // Restablecer los valores predeterminados
+            document.getElementById('corriente').value = "";
+            document.getElementById('longitud').value = "";
+            document.getElementById('unidadLongitud').value = "metros";
+            document.getElementById('material').value = "cobre";
+            document.getElementById('instalacion').value = "monofasica";
+            document.getElementById('tension').value = "220";
+            document.getElementById('maxCaidaTension').value = "";
+        }
+    </script>
+</body>
+</html>
