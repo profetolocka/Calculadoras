@@ -126,12 +126,12 @@
 
         function calcularCaidaTension() {
             // Obtener valores de los campos
-            var corriente = document.getElementById('corriente').value;
-            var longitud = document.getElementById('longitud').value;
-            var seccion = document.getElementById('seccion').value;
+            var corriente = parseFloat(document.getElementById('corriente').value);
+            var longitud = parseFloat(document.getElementById('longitud').value);
+            var seccion = parseFloat(document.getElementById('seccion').value);
             var material = document.getElementById('material').value;
             var instalacion = document.getElementById('instalacion').value;
-            var tension = document.getElementById('tension').value;
+            var tension = parseFloat(document.getElementById('tension').value);
 
             // Convertir la longitud a kilómetros si es necesario
             var longitudEnMetros = longitud;
