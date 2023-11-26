@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Potencia en Corriente Alterna</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      margin: 20px;
+    }
+
+    .potenciasCA-container {
+      max-width: 400px;
+      margin: auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .potenciasCA-title {
+      color: #333;
+    }
+
+    .potenciasCA-label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .potenciasCA-input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    .potenciasCA-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .potenciasCA-button {
+      background-color: #0453F1;
+      color: white;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      width: 48%;
+      text-transform: uppercase;
+    }
+
+    .potenciasCA-button:hover {
+      background-color: #023eab;
+    }
+
+    .potenciasCA-result {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    .potenciasCA-error {
+      font-weight: bold;
+      margin-top: 10px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="potenciasCA-container">
+    <h1 class="potenciasCA-title">Calculadora de Potencia en Corriente Alterna</h1>
+
+    <form id="calculatorForm">
+      <label class="potenciasCA-label" for="potenciaActiva">Potencia Activa (P) [W]:</label>
+      <input class="potenciasCA-input" type="number" id="potenciaActiva" name="potenciaActiva" step="any">
+
+      <label class="potenciasCA-label" for="potenciaReactiva">Potencia Reactiva (Q) [VAr]:</label>
+      <input class="potenciasCA-input" type="number" id="potenciaReactiva" name="potenciaReactiva" step="any">
+
+      <label class="potenciasCA-label" for="potenciaAparente">Potencia Aparente (S) [VA]:</label>
+      <input class="potenciasCA-input" type="number" id="potenciaAparente" name="potenciaAparente" step="any">
+
+      <div class="potenciasCA-buttons">
+        <button class="potenciasCA-button" type="button" onclick="calcularPotencia()">Calcular</button>
+        <button class="potenciasCA-button" type="button" onclick="reiniciar()">Reiniciar</button>
+      </div>
+
+      <p class="potenciasCA-result" id="factorPotencia"></p>
+      <p class="potenciasCA-error" id="errorMessage"></p>
+    </form>
+  </div>
+
+  <script>
+    function calcularPotencia() {
+      var potenciaActiva = parseFloat(document.getElementById('potenciaActiva').value);
+      var potenciaReactiva = parseFloat(document.getElementById('potenciaReactiva').value);
+      var potenciaAparente = parseFloat(document.getElementById('potenciaAparente').value);
+
+      var cantidadCamposLlenos = [!isNaN(potenciaActiva), !isNaN(potenciaReactiva), !isNaN(potenciaAparente)].filter(Boolean).length;
+
+      var factorPotenciaOutput = document.getElementById('factorPotencia');
+      var errorMessageOutput = document.getElementById('errorMessage');
+
+      if (cantidadCamposLlenos !== 2) {
+        errorMessageOutput.textContent = 'Por favor, ingrese exactamente dos valores de potencia para realizar el cálculo.';
+        factorPotenciaOutput.textContent = '';
+        return;
+      }
+
+      errorMessageOutput.textContent = ''; // Limpiar mensaje de error
+
+      if (isNaN(potenciaAparente)) {
+        // Calcular Potencia Aparente
+        potenciaAparente = Math.sqrt(Math.pow(potenciaActiva, 2) + Math.pow(potenciaReactiva, 2));
+        document.getElementById('potenciaAparente').value = potenciaAparente.toFixed(2);
+      } else if (isNaN(potenciaReactiva)) {
+        // Calcular Potencia Reactiva
+        if (potenciaAparente > potenciaActiva) {
+            potenciaReactiva = Math.sqrt(Math.pow(potenciaAparente, 2) - Math.pow(potenciaActiva, 2));
+            document.getElementById('potenciaReactiva').value = potenciaReactiva.toFixed(2);
+        } else {
+            errorMessageOutput.textContent = 'Error, La potencia aparente debe ser mayor que la activa';
+            factorPotenciaOutput.textContent = '';
+            return;
+        }
+      } else if (isNaN(potenciaActiva)) {
+        // Calcular Potencia Activa
+        if (potenciaAparente > potenciaReactiva) {
+            potenciaActiva = Math.sqrt(Math.pow(potenciaAparente, 2) - Math.pow(potenciaReactiva, 2));
+            document.getElementById('potenciaActiva').value = potenciaActiva.toFixed(2);
+        } else {
+            errorMessageOutput.textContent = 'Error, la potencia aparente debe ser mayor que la reactiva';
+            factorPotenciaOutput.textContent = '';
+            return;
+        }
+      }
+
+      // Calcular y mostrar el factor de potencia (cos φ)
+      var factorPotencia = potenciaActiva / potenciaAparente;
+      factorPotenciaOutput.textContent = 'Factor de Potencia (cos φ): ' + factorPotencia.toFixed(2);
+    }
+
+    function reiniciar() {
+      document.getElementById('potenciaActiva').value = '';
+      document.getElementById('potenciaReactiva').value = '';
+      document.getElementById('potenciaAparente').value = '';
+      document.getElementById('factorPotencia').textContent = '';
+      document.getElementById('errorMessage').textContent = '';
+    }
+  </script>
+
+</body>
+</html>
