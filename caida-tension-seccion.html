@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Sección de Cable</title>
+    <title>Calculadora de caída de tensión</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -71,7 +71,7 @@
 </head>
 <body>
     <div class="calculo-caida771-container">
-        <h2 class="calculo-caida771-title">Calculadora de Sección de Cable</h2>
+        <h2 class="calculo-caida771-title">Calculadora de caída de tensión</h2>
 
         <label for="corriente" class="calculo-caida771-label">Corriente (amperes): </label>
         <input type="number" id="corriente" class="calculo-caida771-input" required>
@@ -102,8 +102,8 @@
         <input type="number" id="maxCaidaTension" class="calculo-caida771-input" required>
 
         <div class="calculo-caida771-buttons">
-            <button onclick="calcularSeccionCable()" class="calculo-caida771-button">Calcular Sección</button>
-            <button onclick="reiniciarCalculo()" class="calculo-caida771-button">Reiniciar</button>
+            <button onclick="calcularSeccionCable()" class="calculo-caida771-button">CALCULAR</button>
+            <button onclick="reiniciarCalculo()" class="calculo-caida771-button">REINICIAr</button>
         </div>
 
         <h3 class="calculo-caida771-result">Resultado:</h3>
@@ -151,14 +151,23 @@
                 gdc = 0.055;
             }
 
+            // Definir la lista de secciones disponibles
+            var seccionesDisponibles = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
+
             // Calcular la sección del cable para cumplir con la máxima caída de tensión
             var seccionCalculada = (gdc * corriente * longitudEnMetros) / (maxCaidaTension / 100 * tension);
 
-            // Seleccionar la sección más cercana y mayor del conjunto proporcionado
-            var seccionesDisponibles = [1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
-            var seccion = seccionesDisponibles.reduce(function (prev, curr) {
-                return (Math.abs(curr - seccionCalculada) < Math.abs(prev - seccionCalculada) ? curr : prev);
+            // Seleccionar la sección igual o inmediatamente superior en la lista de secciones disponibles
+            var seccion = seccionesDisponibles.find(function (valor) {
+                return valor >= seccionCalculada;
             });
+
+            // Si no se encuentra un valor igual o superior, tomar el inmediato superior
+            if (!seccion) {
+                seccion = Math.min.apply(null, seccionesDisponibles.filter(function (valor) {
+                    return valor > seccionCalculada;
+                }));
+            }
 
             // Mostrar el resultado con el superíndice "2"
             document.getElementById('seccionResultado').innerText = 'Sección del Cable Necesaria: ' + seccion + ' mm²';
