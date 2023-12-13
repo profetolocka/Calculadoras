@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Eléctrica</title>
+    <style>
+        /* Agrega estilos si es necesario */
+    </style>
+</head>
+<body>
+    <h1>Calculadora Eléctrica</h1>
+
+    <label for="tensionMonofasica">Tensión monofásica (V):</label>
+    <input type="number" id="tensionMonofasica" value="220">
+
+    <label for="tensionTrifasica">Tensión trifásica (V):</label>
+    <input type="number" id="tensionTrifasica" value="380">
+
+    <label for="cantidadCircuitos">Cantidad de Circuitos:</label>
+    <input type="number" id="cantidadCircuitos" min="1">
+    <button onclick="iniciarCalculadora()">OK</button>
+
+    <div id="camposCircuitosDiv"></div>
+    <button onclick="calcular()">CALCULAR</button>
+    <!-- Eliminamos el div de la tabla de resultados -->
+    <!--<div id="tablaResultados"></div>-->
+
+    <script>
+        let tensionMonofasica = 220;
+        let tensionTrifasica = 380;
+        let cantidadCircuitos;
+        let circuitos = [];
+        let dpmsCircuitos = []; // Nueva lista para almacenar DPMS de cada circuito
+        let factorSimultaneidad = 1; // Inicializamos con el valor predeterminado
+        let dpmsSeccional = 0; // Inicializamos con el valor predeterminado
+
+        function iniciarCalculadora() {
+            tensionMonofasica = parseInt(document.getElementById('tensionMonofasica').value) || 220;
+            tensionTrifasica = parseInt(document.getElementById('tensionTrifasica').value) || 380;
+
+            cantidadCircuitos = parseInt(document.getElementById('cantidadCircuitos').value);
+
+            if (isNaN(cantidadCircuitos) || cantidadCircuitos < 1) {
+                alert('Por favor, ingrese una cantidad válida de circuitos.');
+                return;
+            }
+
+            circuitos = []; // Reiniciar la lista de circuitos
+            dpmsCircuitos = []; // Reiniciar la lista de DPMS
+            factorSimultaneidad = 1; // Reiniciar el factor de simultaneidad
+            dpmsSeccional = 0; // Reiniciar la variable dpmsSeccional
+
+            const camposCircuitosDiv = document.getElementById('camposCircuitosDiv');
+            camposCircuitosDiv.innerHTML = ''; // Limpiar campos anteriores
+
+            for (let i = 1; i <= cantidadCircuitos; i++) {
+                const campoCircuito = document.createElement('div');
+                campoCircuito.innerHTML = `
+                  <h2>Circuito ${i}</h2>
+                  <label for="nombre${i}">Nombre:</label>
+                  <input type="text" id="nombre${i}" required>
+
+                  <label for="tipo${i}">Tipo:</label>
+                  <select id="tipo${i}" onchange="mostrarDPMS(${i})" required>
+                    <option value="TUG">TUG</option>
+                    <option value="IUG">IUG</option>
+                    <option value="TUE">TUE</option>
+                    <option value="APM">APM</option>
+                    <option value="ACU">ACU</option>
+                  </select>
+
+                  <label for="instalacion${i}">Instalación:</label>
+                  <select id="instalacion${i}" required>
+                    <option value="Monofásico">Monofásico</option>
+                    <option value="Trifásico">Trifásico</option>
+                  </select>
+
+                  <!-- Agregar campo Cantidad de bocas solo si el tipo es IUG -->
+                  <div id="bocasContainer${i}" style="display: none;">
+                    <label for="bocas${i}">Cantidad de bocas:</label>
+                    <input type="number" id="bocas${i}" min="1">
+                  </div>
+
+                  <div id="dpmsContainer${i}" style="display: none;">
+                    <label for="dpms${i}">DPMS (VA):</label>
+                    <input type="number" id="dpms${i}" min="0">
+                  </div>
+
+                  <hr>
+                `;
+                camposCircuitosDiv.appendChild(campoCircuito);
+            }
+        }
+
+        function mostrarDPMS(circuito) {
+            const tipo = document.getElementById(`tipo${circuito}`).value;
+            const dpmsContainer = document.getElementById(`dpmsContainer${circuito}`);
+            const bocasContainer = document.getElementById(`bocasContainer${circuito}`);
+
+            if (tipo === 'ACU') {
+                dpmsContainer.style.display = 'block';
+                bocasContainer.style.display = 'none';
+            } else if (tipo === 'IUG') {
+                dpmsContainer.style.display = 'none';
+                bocasContainer.style.display = 'block';
+            } else {
+                dpmsContainer.style.display = 'none';
+                bocasContainer.style.display = 'none';
+            }
+        }
+
+        function calcular() {
+            // Limpiamos la lista antes de calcular
+            dpmsCircuitos = [];
+
+            for (let i = 1; i <= cantidadCircuitos; i++) {
+                const tipo = document.getElementById(`tipo${i}`).value;
+
+                if (tipo === 'IUG') {
+                    const bocas = parseInt(document.getElementById(`bocas${i}`).value) || 0;
+                    dpmsCircuitos.push(bocas * 40);
+                } else if (tipo === 'TUG') {
+                    dpmsCircuitos.push(2200);
+                } else if (tipo === 'TUE') {
+                    dpmsCircuitos.push(3300);
+                } else if (tipo === 'ACU') {
+                    const dpms = parseInt(document.getElementById(`dpms${i}`).value) || 0;
+                    dpmsCircuitos.push(dpms);
+                }
+            }
+
+            // Calculamos el factor de simultaneidad
+            const noACUAPMCount = dpmsCircuitos.filter(dpms => dpms !== 'ACU' && dpms !== 'APM').length;
+
+            if (noACUAPMCount === 3 || noACUAPMCount === 4) {
+                factorSimultaneidad = 0.8;
+            } else if (noACUAPMCount === 5) {
+                factorSimultaneidad = 0.7;
+            } else if (noACUAPMCount === 6) {
+                factorSimultaneidad = 0.6;
+            } else if (noACUAPMCount < 3) {
+                factorSimultaneidad = 1;
+            }
+
+            // Calculamos dpmsSeccional
+            dpmsSeccional = dpmsCircuitos
+                .filter(dpms => dpms !== 'ACU' && dpms !== 'APM')
+                .reduce((total, dpms) => total + dpms, 0) * factorSimultaneidad;
+
+            // Mostramos los resultados en la consola
+            console.log('DPMS de cada circuito:', dpmsCircuitos);
+            console.log('dpmsSeccional:', dpmsSeccional);
+            console.log('factorSimultaneidad:', factorSimultaneidad);
+        }
+    </script>
+</body>
+</html>

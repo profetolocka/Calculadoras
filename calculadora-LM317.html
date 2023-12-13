@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora LM317</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .tab {
+    display: none;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-top: 10px;
+  }
+  .tab.active {
+    display: block;
+  }
+  .tab-container {
+    width: 90%; /*antes 80*/
+    max-width: 500px;
+    margin: 50px auto;
+  }
+  input[type="number"], input[type="text"], select, button {
+    width: 95%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  button {
+    width: auto;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  .tabs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-around;
+    background-color: #007bff;
+    border-radius: 4px;
+    color: white;
+  }
+  .tabs li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .tabs li:hover,
+  .tabs li.active {
+    background-color: #0056b3;
+  }
+  .form-container {
+    margin-top: 15px;
+  }
+  .divider {
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+  }
+  .field-title {
+    display: block;
+    margin-top: 10px;
+  }
+    #resultadoTension {
+    margin-top: 20px; /* Ajusta este valor según tus necesidades */
+  }
+  #resultadoR2 {
+    margin-top: 20px; /* Ajusta este valor según tus necesidades */
+  }
+</style>
+</head>
+<body>
+
+    <div class="tab-container">
+        <ul class="tabs">
+          <li class="active" onclick="changeTab('Calcular tensión')">Calcular tensión</li>
+          <li onclick="changeTab('Calcular R2')">Calcular R2</li>
+        </ul>
+      
+        <div id="Calcular tensión" class="tab active">
+          <!-- Contenido para la pestaña Calcular tensión -->
+          <p>R1 (Ω): <input type="number" id="r1" min="0"></p>
+          <p>R2 (Ω): <input type="number" id="r2" min="0"></p>
+          <button onclick="calcularTensionSalida()">Calcular</button>
+          <p id="resultadoTension">Tensión de Salida: </p>
+        </div>
+      
+        <div id="Calcular R2" class="tab">
+          <p>Tensión de salida (V): <input type="number" id="tensionSalidaR2" min="0"></p>
+          <p>R1 (Ω): <input type="number" id="r1R2" min="0"></p>
+          <button onclick="calcularR2()">Calcular</button>
+          <p id="resultadoR2">R2: </p>
+        </div>
+      </div>
+      
+      <script>
+      function changeTab(tabId) {
+        var tabs = document.querySelectorAll('.tab');
+        var tabButtons = document.querySelectorAll('.tabs li');
+        tabs.forEach(function(tab) {
+          tab.classList.remove('active');
+          if(tab.id === tabId) {
+            tab.classList.add('active');
+          }
+        });
+        tabButtons.forEach(function(tabButton) {
+          tabButton.classList.remove('active');
+          if(tabButton.textContent === tabId) {
+            tabButton.classList.add('active');
+          }
+        });
+      }
+      
+      function calcularTensionSalida() {
+        var r1 = parseFloat(document.getElementById('r1').value);
+        var r2 = parseFloat(document.getElementById('r2').value);
+      
+        if (isNaN(r1) || isNaN(r2) || r1 <= 0 || r2 <= 0) {
+          document.getElementById('resultadoTension').textContent = 'Error: Por favor ingrese valores válidos para las resistencias.';
+          return;
+        }
+      
+        if (r1 < 100 || r1 > 1000) {
+          document.getElementById('resultadoTension').textContent = 'Error, R1 debe estar entre los 100 y 1000 Ω';
+          return;
+        }
+      
+        var tensionSalida = 1.25 * (1 + (r2 / r1));
+        document.getElementById('resultadoTension').textContent = 'Tensión de Salida: ' + tensionSalida.toFixed(2) + ' Volts';
+      }
+      
+      function calcularR2() {
+        var tensionSalida = parseFloat(document.getElementById('tensionSalidaR2').value);
+        var r1 = parseFloat(document.getElementById('r1R2').value);
+      
+        if (isNaN(tensionSalida) || isNaN(r1) || tensionSalida <= 0 || r1 <= 0) {
+          document.getElementById('resultadoR2').textContent = 'Error: Por favor ingrese valores válidos.';
+          return;
+        }
+
+        if (r1 < 100 || r1 > 1000) {
+          document.getElementById('resultadoR2').textContent = 'Error, R1 debe estar entre los 100 y 1000 Ω';
+          return;
+        }
+      
+        var r2 = ((tensionSalida / 1.25) - 1) * r1;
+        document.getElementById('resultadoR2').textContent = 'R2: ' + r2.toFixed(2) + ' Ω';
+      }
+      </script>
+      </body>
+      </html>
