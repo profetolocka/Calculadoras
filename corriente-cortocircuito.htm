@@ -3,15 +3,17 @@
 <head>
     <title>Calculadora de Corriente de Cortocircuito del Transformador</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        .calculadora-icc-outer-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0;
+            width: 100%; /* Asegura que ocupe todo el ancho disponible */
+            height: 100vh; /* O cualquier altura que desees */
         }
 
-        .calculadora-icc-container {
+         .calculadora-icc-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 400px;
             background: white;
             padding: 20px;
@@ -19,12 +21,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin: auto;
         }
+      
         .calculadora-icc-input {
             margin-bottom: 10px;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: calc(100% - 16px);
+            width: 100%;
         }
         .calculadora-icc-message {
             color: black;
@@ -36,6 +39,11 @@
         .calculadora-icc-error-message {
             color: red;
         }
+
+        .calculadora-icc-button-container-separado {
+            margin-top: 20px;
+        }
+
         .calculadora-icc-button {
             background-color: #007bff;
             color: white;
@@ -82,7 +90,7 @@
         
         <div id="seccionesTramos"></div>
 
-        <div class="calculadora-icc-button-container">
+        <div class="calculadora-icc-button-container calculadora-icc-button-container-separado">
             <button onclick="calculate()" class="calculadora-icc-button">Calcular</button>
             <button onclick="reset()" class="calculadora-icc-button">Reiniciar</button>
         </div>
@@ -97,9 +105,9 @@
 
             for (var i = 0; i < numeroTramos; i++) {
                 contenedorTramos.innerHTML += `
-                    <div class="tramo-container" style="margin-top: 10px;">
-                        <div class="calculator-label">Tipo de cable (Tramo ${i + 1}):</div>
-                        <select class="calculator-input tipoCable">
+               <div class="tramo-container" style="margin-top: 10px;">
+                <div class="calculadora-icc-label">Tipo de cable (Tramo ${i + 1}):</div>
+                  <select class="calculadora-icc-input tipoCable">  
                             <option value="1">IRAM 2263 - Al - 3x25/50</option>
                             <option value="2">IRAM 2263 - Al - 3x35/50</option>
                             <option value="3">IRAM 2263 - Al - 3x50/50</option>
