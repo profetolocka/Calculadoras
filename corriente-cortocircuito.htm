@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculadora de Corriente de Cortocircuito del Transformador</title>
+    <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .calculator-container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        .calculator-input {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 16px);
+        }
+        .calculator-message {
+            color: black;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+        }
+        .calculator-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            width: calc(50% - 10px);
+        }
+        .calculator-button:hover {
+            background-color: #0056b3;
+        }
+        .calculator-button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .calculator-label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-label">Potencia del transformador (kVA):</div>
+        <input type="number" id="potencia" class="calculator-input" placeholder="Ingrese la potencia">
+        
+        <div class="calculator-label">Tensión de línea (V):</div>
+        <input type="number" id="tension" class="calculator-input" placeholder="Ingrese la tensión de línea" value="380">
+
+      
+        <!-- Contenedor Flex para Tramos y el botón Cargar tramos -->
+        <div style="display: flex; align-items: center;">
+            <div style="flex-grow: 1; margin-right: 10px;">
+                <div class="calculator-label">Tramos:</div>
+                <input type="number" id="tramos" class="calculator-input" value="1">
+            </div>
+            <button onclick="cargarTramos()" class="calculator-button">Cargar tramos</button>
+        </div>
+        
+        <div id="seccionesTramos"></div>
+
+        <div class="calculator-button-container">
+            <button onclick="calculate()" class="calculator-button">Calcular</button>
+            <button onclick="reset()" class="calculator-button">Reiniciar</button>
+        </div>
+        <div id="output" class="calculator-message"></div>
+    </div>
+
+    <script>
+        function cargarTramos() {
+            var numeroTramos = parseInt(document.getElementById('tramos').value);
+            var contenedorTramos = document.getElementById('seccionesTramos');
+            contenedorTramos.innerHTML = '';
+
+            for (var i = 0; i < numeroTramos; i++) {
+                contenedorTramos.innerHTML += `
+                    <div class="tramo-container" style="margin-top: 10px;">
+                        <div class="calculator-label">Tipo de cable (Tramo ${i + 1}):</div>
+                        <select class="calculator-input tipoCable">
+                            <option value="1">IRAM 2263 - Al - 3x25/50</option>
+                            <option value="2">IRAM 2263 - Al - 3x35/50</option>
+                            <option value="3">IRAM 2263 - Al - 3x50/50</option>
+                            <option value="4">IRAM 2263 - Al - 3x70/50</option>
+                            <option value="5">IRAM 2263 - Al - 3x95/50</option>
+                            <option value="6">IRAM 2178 - Cu - 4x4</option>
+                            <option value="7">IRAM 2178 - Cu - 4x6</option>
+                            <option value="8">IRAM 2178 - Cu - 4x10</option>
+                            <option value="9">IRAM 2178 - Cu - 4x16</option>
+                        </select>
+                        <div class="calculator-label">Distancia (Metros):</div>
+                        <input type="number" class="calculator-input distancia" placeholder="Ingrese la distancia">
+                    </div>
+                `;
+            }
+        }
+
+        function calculate() {
+            var potencia = parseFloat(document.getElementById('potencia').value);
+          
+            var tension = parseFloat(document.getElementById('tension').value); // Recuperar la tensión de línea
+
+            var output = document.getElementById('output');
+            var tramos = document.getElementsByClassName('tramo-container');
+
+            try {
+                if (isNaN(potencia)) {
+                    throw "Por favor, ingrese un valor numérico válido para la potencia.";
+                }
+
+                var Z = calcularZ(potencia);  //Z%
+                var Icct = (potencia * 100000) / (tension * 1.73 * Z);
+                var Zt = (Z * tension * tension) / (100 * potencia);  //Impedancia del trafo
+              
+                var Zsuma = 0;  //Impedancia total de todo el circuito
+              
+              
+                output.innerHTML = 'Icc en bornes del transformador: ' + Icct.toFixed(2) + ' A<br>';
+
+                for (var i = 0; i < tramos.length; i++) {
+                    var tipoCable = tramos[i].querySelector('.tipoCable').value;
+                    var distancia = parseFloat(tramos[i].querySelector('.distancia').value);
+
+                    if (isNaN(distancia)) {
+                        throw "Por favor, ingrese valores numéricos válidos para las distancias.";
+                    }
+
+                    var { Rc, Xc } = obtenerValoresCable(tipoCable);
+                    var Rct = Rc * distancia;
+                    var Xct = Xc * distancia;
+                    var Zct = Math.sqrt(Rct * Rct + Xct * Xct);  //Impedancia de este tramo
+              
+
+              		
+              		Zsuma = Zsuma + Zct  //Sumo la Z de este tramo a los tramos previos
+              
+                      var Icc = Icct / (1 + (Zsuma / Zt));
+              
+
+                    output.innerHTML += 'Icc tramo ' + (i + 1) + ': ' + Icc.toFixed(2) + ' A<br>';
+                }
+            } catch (err) {
+                output.innerHTML = '<span class="error-message">' + err + '</span>';
+            }
+        }
+
+        function calcularZ(potencia) {
+            if (potencia <= 100) return 4;
+            else if (potencia <= 400) return 4.5;
+            else if (potencia <= 500) return 4.5;
+            else if (potencia <= 800) return 5;
+            else return 6.5;
+        }
+
+        function obtenerValoresCable(tipoCable) {
+            switch (tipoCable) {
+                case "1": return { Rc: 1.394, Xc: 0.088 };
+                case "2": return { Rc: 1.008, Xc: 0.088 };
+                case "3": return { Rc: 0.745, Xc: 0.086 };
+                case "4": return { Rc: 0.515, Xc: 0.085 };
+                case "5": return { Rc: 0.373, Xc: 0.084 };
+                case "6": return { Rc: 5.92, Xc: 0.0991 };
+                case "7": return { Rc: 3.95, Xc: 0.0901 };
+                case "8": return { Rc: 2.29, Xc: 0.0860 };
+                case "9": return { Rc: 1.45, Xc: 0.0813 };
+ 
+                default: throw "Tipo de cable no válido.";
+            }
+        }
+
+        function reset() {
+            document.getElementById('potencia').value = '';
+            document.getElementById('tramos').value = '1';
+            document.getElementById('seccionesTramos').innerHTML = '';
+            document.getElementById('output').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
