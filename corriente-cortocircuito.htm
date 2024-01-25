@@ -3,7 +3,7 @@
 <head>
     <title>Calculadora de Corriente de Cortocircuito del Transformador</title>
     <style>
-          body {
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
@@ -11,7 +11,7 @@
             margin: 0;
         }
 
-        .calculator-container {
+        .calculadora-icc-container {
             max-width: 400px;
             background: white;
             padding: 20px;
@@ -19,24 +19,24 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin: auto;
         }
-        .calculator-input {
+        .calculadora-icc-input {
             margin-bottom: 10px;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             width: calc(100% - 16px);
         }
-        .calculator-message {
+        .calculadora-icc-message {
             color: black;
             margin-top: 10px;
             padding: 10px;
             background-color: #f0f0f0;
             border-radius: 4px;
         }
-        .error-message {
+        .calculadora-icc-error-message {
             color: red;
         }
-        .calculator-button {
+        .calculadora-icc-button {
             background-color: #007bff;
             color: white;
             border: none;
@@ -49,14 +49,14 @@
             border-radius: 4px;
             width: calc(50% - 10px);
         }
-        .calculator-button:hover {
+        .calculadora-icc-button:hover {
             background-color: #0056b3;
         }
-        .calculator-button-container {
+        .calculadora-icc-button-container {
             display: flex;
             justify-content: space-between;
         }
-        .calculator-label {
+        .calculadora-icc-label {
             font-size: 14px;
             margin-bottom: 5px;
             color: #333;
@@ -64,30 +64,29 @@
     </style>
 </head>
 <body>
-    <div class="calculator-container">
-        <div class="calculator-label">Potencia del transformador (kVA):</div>
-        <input type="number" id="potencia" class="calculator-input" placeholder="Ingrese la potencia">
+    <div class="calculadora-icc-container">
+        <div class="calculadora-icc-label">Potencia del transformador (kVA):</div>
+        <input type="number" id="potencia" class="calculadora-icc-input" placeholder="Ingrese la potencia">
         
-        <div class="calculator-label">Tensión de línea (V):</div>
-        <input type="number" id="tension" class="calculator-input" placeholder="Ingrese la tensión de línea" value="380">
+        <div class="calculadora-icc-label">Tensión de línea (V):</div>
+        <input type="number" id="tension" class="calculadora-icc-input" placeholder="Ingrese la tensión de línea" value="380">
 
-      
         <!-- Contenedor Flex para Tramos y el botón Cargar tramos -->
         <div style="display: flex; align-items: center;">
             <div style="flex-grow: 1; margin-right: 10px;">
-                <div class="calculator-label">Tramos:</div>
-                <input type="number" id="tramos" class="calculator-input" value="1">
+                <div class="calculadora-icc-label">Tramos:</div>
+                <input type="number" id="tramos" class="calculadora-icc-input" value="1">
             </div>
-            <button onclick="cargarTramos()" class="calculator-button">Cargar tramos</button>
+            <button onclick="cargarTramos()" class="calculadora-icc-button">Cargar tramos</button>
         </div>
         
         <div id="seccionesTramos"></div>
 
-        <div class="calculator-button-container">
-            <button onclick="calculate()" class="calculator-button">Calcular</button>
-            <button onclick="reset()" class="calculator-button">Reiniciar</button>
+        <div class="calculadora-icc-button-container">
+            <button onclick="calculate()" class="calculadora-icc-button">Calcular</button>
+            <button onclick="reset()" class="calculadora-icc-button">Reiniciar</button>
         </div>
-        <div id="output" class="calculator-message"></div>
+        <div id="output" class="calculadora-icc-message"></div>
     </div>
 
     <script>
