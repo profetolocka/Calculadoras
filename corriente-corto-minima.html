@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body { font-family: Arial, sans-serif; background-color: #f8f8f8; }
+    .calc-corto-minimo-container { max-width: 400px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 20px; background-color: #fff; }
+    .calc-corto-minimo-form-group { margin-bottom: 10px; }
+    label { display: block; margin-bottom: 5px; }
+    select, .calc-corto-minimo-result { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
+
+    .calc-corto-minimo-result {
+        background-color: #e9e9e9;
+        color: #000;
+        margin-top: 10px;
+        box-sizing: border-box;
+    }
+
+    .calc-corto-minimo-button-container {
+      text-align: center;
+      font-size: 0; /* Elimina el espacio en blanco entre elementos inline-block */
+    }
+
+    .calc-corto-minimo-button {
+      width: 48%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 16px; /* Restaura el tamaño de fuente */
+      box-sizing: border-box;
+    }
+    
+    .calc-corto-minimo-button:first-child { margin-right: 4%; }
+    .calc-corto-minimo-button:hover { background-color: #0056b3; }
+    .calc-corto-minimo-error { color: red; margin-top: 10px; }
+</style>
+<script>
+  // Datos
+  const data = {
+    "1.5": {
+      "10": {
+        "B": { "1500": 160, "3000": 163, "4000": 163, "5000": 164, "6000": 164, "7000": 164, "8000": 164, "9000": 164, "10000":165},
+        "C": { "1500":  77, "3000":  80, "4000":  81, "5000":  81, "6000":  81, "7000":  81, "8000":  82, "9000":  82, "10000": 82},
+        "D": { "1500":  36, "3000":  38, "4000":  39, "5000":  40, "6000":  40, "7000":  40, "8000":  40, "9000":  40, "10000": 40}
+      },
+    },
+    "2.5": {
+      "16": {
+        "B": { "1500": 163, "3000": 167, "4000": 169, "5000": 169, "6000": 170, "7000": 170, "8000": 170, "9000": 171, "10000":171},
+        "C": { "1500":  77, "3000":  81, "4000":  83, "5000":  83, "6000":  84, "7000":  84, "8000":  84, "9000":  85, "10000": 85},
+        "D": { "1500":  33, "3000":  38, "4000":  39, "5000":  40, "6000":  41, "7000":  41, "8000":  41, "9000":  41, "10000": 42}
+      },
+    },
+    "4": {
+      "25": {
+        "B": { "1500": 162, "3000": 170, "4000": 172, "5000": 173, "6000": 174, "7000": 174, "8000": 175, "9000": 175, "10000":175},
+        "C": { "1500":  73, "3000":  81, "4000":  83, "5000":  84, "6000":  85, "7000":  86, "8000":  86, "9000":  86, "10000": 87},
+        "D": { "1500":  29, "3000":  37, "4000":  39, "5000":  40, "6000":  41, "7000":  41, "8000":  42, "9000":  42, "10000": 42}
+      },
+    },
+    "6": {
+      "32": {
+        "B": { "1500": 185, "3000": 197, "4000": 200, "5000": 201, "6000": 203, "7000": 203, "8000": 204, "9000": 204, "10000":205},
+        "C": { "1500":  81, "3000":  93, "4000":  95, "5000":  97, "6000":  98, "7000":  99, "8000": 100, "9000": 100, "10000":101},
+        "D": { "1500":  29, "3000":  40, "4000":  43, "5000":  45, "6000":  46, "7000":  47, "8000":  48, "9000":  48, "10000": 49}
+      },
+    },
+    "10": {
+      "40": {
+        "B": { "1500": 248, "3000": 268, "4000": 273, "5000": 276, "6000": 278, "7000": 279, "8000": 280, "9000": 281, "10000":282},
+        "C": { "1500": 104, "3000": 124, "4000": 129, "5000": 132, "6000": 134, "7000": 135, "8000": 136, "9000": 137, "10000":138},
+        "D": { "1500":  32, "3000":  52, "4000":  57, "5000":  60, "6000":  62, "7000":  63, "8000":  64, "9000":  65, "10000": 66}
+      },
+    },
+    "16": {
+      "50": {
+        "B": { "1500": 300, "3000": 332, "4000": 340, "5000": 345, "6000": 348, "7000": 350, "8000": 352, "9000": 353, "10000":354},
+        "C": { "1500": 118, "3000": 150, "4000": 158, "5000": 163, "6000": 166, "7000": 168, "8000": 170, "9000": 171, "10000":172},
+        "D": { "1500":  27, "3000":  59, "4000":  67, "5000":  72, "6000":  75, "7000":  77, "8000":  79, "9000":  80, "10000": 81}
+      },
+    },
+    "25": {
+      "63": {
+        "B": { "1500": 349, "3000": 398, "4000": 411, "5000": 418, "6000": 423, "7000": 427, "8000": 429, "9000": 431, "10000":433},
+        "C": { "1500": 125, "3000": 174, "4000": 187, "5000": 194, "6000": 199, "7000": 203, "8000": 205, "9000": 207, "10000":209},
+        "D": { "1500":  13, "3000":  63, "4000":  75, "5000":  82, "6000":  87, "7000":  91, "8000":  93, "9000":  95, "10000": 97}
+      },
+    },
+    "35": {
+      "80": {
+        "B": { "1500": 357, "3000": 427, "4000": 444, "5000": 455, "6000": 462, "7000": 467, "8000": 470, "9000": 473, "10000":476},
+        "C": { "1500": 109, "3000": 179, "4000": 196, "5000": 206, "6000": 213, "7000": 218, "8000": 222, "9000": 225, "10000":227},
+        "D": { "1500":  15, "3000":  55, "4000":  72, "5000":  82, "6000":  89, "7000":  94, "8000":  98, "9000": 101, "10000":103}
+      }
+    }
+  };
+
+ function buscarValor() {
+  try {
+    const seccion = document.getElementById('seccion').value;
+    const intensidad = document.getElementById('intensidad').value;
+    const cdi = document.getElementById('cdi').value;
+    const corriente = document.getElementById('corriente').value;
+    
+    const resultado = data[seccion][intensidad][cdi][corriente];
+    
+    if (resultado !== undefined) {
+      document.getElementById('result').textContent = `Longitud máxima ${resultado} metros`;
+    } else {
+      document.getElementById('result').textContent = 'Valor no encontrado';
+    }
+    document.getElementById('error').textContent = '';
+  } catch (e) {
+    document.getElementById('error').textContent = 'Combinación de sección/corriente incorrecta.';
+    document.getElementById('result').textContent = '';
+  }
+}
+
+  function reiniciar() {
+    document.getElementById('seccion').selectedIndex = 0;
+    document.getElementById('intensidad').selectedIndex = 0;
+    document.getElementById('cdi').selectedIndex = 0;
+    document.getElementById('corriente').selectedIndex = 0;
+    buscarValor(); // Actualiza la visualización del resultado basada en los valores por defecto
+  }
+</script>
+</head>
+<body>
+
+    <div class="calc-corto-minimo-container">
+        <div class="calc-corto-minimo-form-group">
+            <label for="seccion">Sección conductor Cu (mm²)</label>
+               <select id="seccion">
+                    <option value="1.5">1,5</option>
+                    <option value="2.5">2,5</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="10">10</option>
+                    <option value="16">16</option>
+                    <option value="25">25</option>
+                    <option value="35">35</option>
+                </select>
+        </div>
+
+        <div class="calc-corto-minimo-form-group">
+            <label for="intensidad">Corriente nominal del interruptor (A)</label>
+                <select id="intensidad">
+                    <option value="10">10</option>
+                    <option value="16">16</option>
+                    <option value="25">25</option>
+                    <option value="32">32</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="63">63</option>
+                    <option value="80">80</option>
+                </select>
+        </div>
+
+        <div class="calc-corto-minimo-form-group">
+            <label for="cdi">CDI (Curva)</label>
+            <select id="cdi">
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
+
+        <div class="calc-corto-minimo-form-group">
+            <label for="corriente">Corriente de cortocircuito (A)</label>
+                <select id="corriente">
+                    <option value="1500">1500</option>
+                    <option value="3000">3000</option>
+                    <option value="4000">4000</option>
+                    <option value="5000">5000</option>
+                    <option value="6000">6000</option>
+                    <option value="7000">7000</option>
+                    <option value="8000">8000</option>
+                    <option value="9000">9000</option>
+                    <option value="10000">10000</option>
+                </select>
+        </div>
+
+        <div class="calc-corto-minimo-button-container">
+            <button class="calc-corto-minimo-button" onclick="buscarValor()">Buscar Valor</button>
+            <button class="calc-corto-minimo-button" onclick="reiniciar()">Reiniciar</button>
+        </div>
+
+        <div id="error" class="calc-corto-minimo-error"></div>
+        <div id="result" class="calc-corto-minimo-result"></div>
+    </div>
+
+</body>
+</html>

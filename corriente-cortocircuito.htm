@@ -27,8 +27,13 @@
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 100%;
+            width: 95%;
         }
+
+        .calculadora-icc-input-tramos {
+            width: 60%; /* O el ancho específico que prefieras */
+        }
+
         .calculadora-icc-message {
             color: black;
             margin-top: 10px;
@@ -83,7 +88,7 @@
         <div style="display: flex; align-items: center;">
             <div style="flex-grow: 1; margin-right: 10px;">
                 <div class="calculadora-icc-label">Tramos:</div>
-                <input type="number" id="tramos" class="calculadora-icc-input" value="1">
+                <input type="number" id="tramos" class="calculadora-icc-input calculadora-icc-input-tramos" value="1">
             </div>
             <button onclick="cargarTramos()" class="calculadora-icc-button">Cargar tramos</button>
         </div>
@@ -118,8 +123,9 @@
                             <option value="8">IRAM 2178 - Cu - 4x10</option>
                             <option value="9">IRAM 2178 - Cu - 4x16</option>
                         </select>
-                        <div class="calculator-label">Longitud (Metros):</div>
-                        <input type="number" class="calculator-input distancia" placeholder="Ingrese la distancia">
+                        
+                        <div class="calculadora-icc-label">Longitud (Metros):</div>
+                        <input type="number" class="calculadora-icc-input distancia" placeholder="Ingrese la distancia">
                     </div>
                 `;
             }
