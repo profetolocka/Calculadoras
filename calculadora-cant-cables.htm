@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Cables</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .container {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    border-radius: 5px;
+  }
+  .input-group {
+    margin-bottom: 10px;
+  }
+  input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  .result-container {
+    background-color: #eee;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 20px;
+  }
+  .error {
+    color: red;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="input-group">
+    <label for="seccionCable">Sección del Cable (mm²):</label>
+    <input type="number" id="seccionCable" placeholder="Ejemplo: 16">
+  </div>
+  <div class="input-group">
+    <label for="diametroCano">Diámetro exterior máximo del Caño (mm):</label>
+    <input type="number" id="diametroCano" placeholder="Ejemplo: 10">
+  </div>
+  <button onclick="calcular()">Calcular</button>
+  <div class="result-container" id="resultado">
+    <!-- Los resultados se mostrarán aquí -->
+  </div>
+</div>
+
+<script>
+// Tu tabla de datos en formato de objeto
+const datosTabla = {
+  'CL16': {
+    '1': '1+PE',
+    '1.5': '3+PE',
+    '2.5': '2+PE',
+    // Continúa para otras secciones
+  },
+  'CSP19': {
+    '1': '4+PE',
+    '1.5': '5+PE',
+    '2.5': '3+PE',
+    // Continúa para otras secciones
+  },
+  // Continúa para otros tipos de caños...
+  'CL22': {
+    '10': '11+PE',
+    '16': '8+PE',
+    '25': '5+PE',
+    '35': '3+PE',
+    '50': '2+PE',
+  },
+  // Y así sucesivamente para todos los valores de la tabla
+};
+
+function calcular() {
+  try {
+    const seccionCable = parseFloat(document.getElementById('seccionCable').value);
+    const diametroCano = parseFloat(document.getElementById('diametroCano').value);
+    
+    // Validar entradas y calcular
+    const resultado = calcularMaxCables(seccionCable, diametroCano);
+    document.getElementById('resultado').innerHTML = resultado ? `Máxima cantidad de cables: ${resultado}` : 'No se encontraron datos para los valores ingresados.';
+    document.getElementById('resultado').classList.remove('error');
+  } catch (error) {
+    document.getElementById('resultado').innerHTML = error.message;
+    document.getElementById('resultado').classList.add('error');
+  }
+}
+
+function calcularMaxCables(seccionCable, diametroCano) {
+  // Implementar lógica de cálculo utilizando `datosTabla`
+  // ...
+}
+
+function limpiar() {
+  document.getElementById('seccionCable').value = '';
+  document.getElementById('diametroCano').value = '';
+  document.getElementById('resultado').innerHTML = '';
+}
+</script>
+</body>
+</html>
